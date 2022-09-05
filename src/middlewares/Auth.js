@@ -1,3 +1,5 @@
+const User = require('../models/User')
+
 module.exports = {
     private: async (req, res, next) => {
         if (!req.query.token && !req.body.token) {
@@ -17,7 +19,12 @@ module.exports = {
             return
         }
 
+        const user = await User.findOne({ token })
 
+        if (!user) {
+            res.json({ notallowed: true })
+            return
+        }
         next()
     }
 }
