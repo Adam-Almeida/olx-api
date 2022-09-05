@@ -5,11 +5,13 @@ const AuthController = require('./controller/AuthController')
 const UserController = require('./controller/UserController')
 const AdsController = require('./controller/AdsController')
 
+const Auth = require('./middlewares/Auth')
+
 router.get('/ping', (req, res) => {
     res.json({ pong: true })
 })
 
-router.get('/states', UserController.getStates)
+router.get('/states', Auth.private, UserController.getStates)
 
 router.post('/user/signin', AuthController.signin)
 router.post('/user/signup', AuthController.signup)
