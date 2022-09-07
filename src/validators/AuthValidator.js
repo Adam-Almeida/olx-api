@@ -26,5 +26,19 @@ module.exports = {
       notEmpty: true,
       errorMessage: 'O estado deve ser preechido.'
     }
+  }),
+  signin: checkSchema({
+    email: {
+      isEmail: true,
+      normalizeEmail: true,
+      errorMessage: 'O email não parece válido.' 
+    },
+    password: {
+      notEmpty: true,
+      isLength: {
+        options: { min: 8, max: 48 }
+      },
+      errorMessage: 'A senha deve ter entre 8 e 48 caracteres.'
+    }
   })
 }
