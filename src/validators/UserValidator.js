@@ -6,7 +6,6 @@ module.exports = {
     name: {
       optional: true,
       trim: true,
-      notEmpty: true,
       isLength: {
         options: { min: 2, max: 255 }
       },
@@ -20,7 +19,6 @@ module.exports = {
     },
     password: {
       optional: true,
-      notEmpty: true,
       isLength: {
         options: { min: 8, max: 48 }
       },

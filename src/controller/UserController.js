@@ -34,6 +34,7 @@ module.exports = {
     },
 
     editAction: async (req, res) => {
+
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
             res.json({ error: errors.mapped() })
@@ -41,13 +42,13 @@ module.exports = {
         }
         const data = matchedData(req)
 
-        let updates = []
+        let updates = {}
         if (data.name) {
             updates.name = data.name
         }
         if (data.email) {
             const emailCheck = await User.findOne({ email: data.email })
-            if (emailCheck) {
+            if (emailCheck && emailCheck.email !== data.email) {
                 res.json({ error: "Email já existente" })
                 return
             }
@@ -68,8 +69,8 @@ module.exports = {
             updates.passwordHash = await bcrypt.hash(data.password, 10)
         }
 
-        await User.findByIdAndUpdate({ token: data.token }, { $set: updates })
+        const user = await User.findOneAndUpdate({ token: data.token }, { $set: updates })
 
-        res.json({ chegou: true })
+        res.json({ Ok: "Dados atualizados com sucesso." })
     }
 }
