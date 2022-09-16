@@ -1,6 +1,16 @@
+const { v4 } = require("uuid")
+const jimp = require('jimp')
+
 const Ad = require("../models/Ad")
 const Category = require("../models/Category")
 const User = require("../models/User")
+
+const addImage = async (buffer) => {
+    let newName = `${v4().jpg}`
+    let tmpImg = await jimp.read(buffer)
+    tmpImg.cover(500, 500).quality(80).write(`./public/media/${newName}`)
+    return newName 
+}
 
 module.exports = {
     getCategories: async (req, res) => {
@@ -45,6 +55,35 @@ module.exports = {
         newAdd.priceNegotiable = (priceNegotiable === 'true' || priceNegotiable === 'on' ? true : false)
         newAdd.description = description
         newAdd.views = 0
+
+        if(req.files && req.files.img){
+            if(req.files.img.length == undefined){
+                if(['image/jpeg', 'image/jpg', 'image/png'].includes(req.files.img.mimetype)){
+                    let url = await addImage(req.files.img.data)
+                    newAdd.images.push({
+                        url,
+                        default: false
+                    })
+                }
+            }else{
+                for(let i = 0; i < req.files.length; i++){
+                    if(['image/jpeg', 'image/jpg', 'image/png'].includes(req.files.img[i].mimetype)){
+                        let url = await addImage(req.files.img[i].data)
+                        newAdd.images.push({
+                            url,
+                            default: false
+                        })
+                    }
+                }
+            }
+        }
+
+        if(newAdd.images.length > 0){
+            newAdd.images[0].default = true
+        }
+
+        const info = await newAdd.save();
+        res.json({info})
 
     },
     getList: async (req, res) => {
