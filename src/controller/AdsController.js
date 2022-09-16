@@ -1,4 +1,4 @@
-const { v4 } = require("uuid")
+const { v4: uuidv4 } = require('uuid');
 const jimp = require('jimp')
 
 const Ad = require("../models/Ad")
@@ -6,7 +6,7 @@ const Category = require("../models/Category")
 const User = require("../models/User")
 
 const addImage = async (buffer) => {
-    let newName = `${v4().jpg}`
+    let newName = `${uuidv4()}.jpg`
     let tmpImg = await jimp.read(buffer)
     tmpImg.cover(500, 500).quality(80).write(`./public/media/${newName}`)
     return newName 
