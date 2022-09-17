@@ -4,6 +4,7 @@ const jimp = require('jimp')
 const Ad = require("../models/Ad")
 const Category = require("../models/Category")
 const User = require("../models/User");
+const { default: mongoose } = require('mongoose');
 const State = require('../models/State');
 
 const addImage = async (buffer) => {
@@ -89,22 +90,22 @@ module.exports = {
     },
     getList: async (req, res) => {
         let { sort = 'asc', offset = 0, limit = 8, q, category, state } = req.query
-        let filters = {stattus : true}
+        let filters = { stattus: true }
 
-        if(q){
-            filters.title = {'$regex':q, '$options': 'i'}
+        if (q) {
+            filters.title = { '$regex': q, '$options': 'i' }
         }
 
-        if(category){
-            const c = await Category.findOne({slug: category}).exec()
-            if(c){
+        if (category) {
+            const c = await Category.findOne({ slug: category }).exec()
+            if (c) {
                 filters.category = c._id.toString()
             }
         }
 
-        if(state){
-            const s = await State.findOne({name: state.toUpperCase()}).exec()
-            if(s){
+        if (state) {
+            const s = await State.findOne({ name: state.toUpperCase() }).exec()
+            if (s) {
                 filters.state = s._id.toString()
             }
         }
@@ -113,10 +114,10 @@ module.exports = {
         const total = adsTotal.length ?? 0
 
         const all = await Ad.find(filters)
-        .sort({dateCreated: (sort == 'desc'?-1:1)})
-        .skip(parseInt(offset))
-        .limit(parseInt(limit))
-        .exec()
+            .sort({ dateCreated: (sort == 'desc' ? -1 : 1) })
+            .skip(parseInt(offset))
+            .limit(parseInt(limit))
+            .exec()
 
         let ads = []
         for (let i in all) {
@@ -145,6 +146,51 @@ module.exports = {
 
     },
     getItem: async (req, res) => {
+        let { id, other = null } = req.query
+        if (!id || id.length < 12) {
+            res.json({ error: 'Produto não identificado' })
+            return
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            res.json({ error: 'Id não identificado' })
+            return
+        }
+
+        const ad = await Ad.findById(id)
+        if (!ad) {
+            res.json({ error: 'Produto inexistente' })
+            return
+        }
+
+        ad.views++
+        await ad.save()
+
+        let images = []
+        for (let i in ad.images) {
+            images.push(`${process.env.BASE}/media/${ad.images[i].url}`)
+        }
+
+        const category = await Category.findById(ad.category).exec()
+        const userInfo = await User.findById(ad.idUser).exec()
+        const state = await State.findById(ad.state).exec()
+
+        res.json({
+            id: ad._id,
+            title: ad.title,
+            price: ad.price,
+            priceNegotiable: ad.priceNegotiable,
+            description: ad.description,
+            dateCreated: ad.dateCreated,
+            views: ad.views,
+            images,
+            category: category.name,
+            userInfo: {
+                name: userInfo.name,
+                email: userInfo.email
+            },
+            state: state.name
+        })
 
     },
 
