@@ -1,10 +1,10 @@
 const { v4: uuidv4 } = require('uuid');
 const jimp = require('jimp')
+const { default: mongoose } = require('mongoose');
 
 const Ad = require("../models/Ad")
 const Category = require("../models/Category")
 const User = require("../models/User");
-const { default: mongoose } = require('mongoose');
 const State = require('../models/State');
 
 const addImage = async (buffer) => {
@@ -36,6 +36,17 @@ module.exports = {
 
         if (!title || !category) {
             res.json({ error: "Título e categoria são obrigatórios" })
+            return
+        }
+
+        if(!mongoose.Types.ObjectId.isValid(category)){
+            res.json({error: "Categoria inexistente"})
+            return
+        }
+
+        const categoryExists = await Category.findById(category)
+        if(!categoryExists){
+            res.json({error: "Categoria inexistente"})
             return
         }
 
