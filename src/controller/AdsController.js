@@ -3,7 +3,8 @@ const jimp = require('jimp')
 
 const Ad = require("../models/Ad")
 const Category = require("../models/Category")
-const User = require("../models/User")
+const User = require("../models/User");
+const State = require('../models/State');
 
 const addImage = async (buffer) => {
     let newName = `${uuidv4()}.jpg`
@@ -87,9 +88,36 @@ module.exports = {
 
     },
     getList: async (req, res) => {
-        const { sort = 'asc', offset = 0, limit = 8, q, category, state } = req.query
+        let { sort = 'asc', offset = 0, limit = 8, q, category, state } = req.query
+        let filters = {stattus : true}
 
-        const all = await Ad.find({ status: true }).exec()
+        if(q){
+            filters.title = {'$regex':q, '$options': 'i'}
+        }
+
+        if(category){
+            const c = await Category.findOne({slug: category}).exec()
+            if(c){
+                filters.category = c._id.toString()
+            }
+        }
+
+        if(state){
+            const s = await State.findOne({name: state.toUpperCase()}).exec()
+            if(s){
+                filters.state = s._id.toString()
+            }
+        }
+
+        const adsTotal = await Ad.find(filters).exec()
+        const total = adsTotal.length ?? 0
+
+        const all = await Ad.find(filters)
+        .sort({dateCreated: (sort == 'desc'?-1:1)})
+        .skip(parseInt(offset))
+        .limit(parseInt(limit))
+        .exec()
+
         let ads = []
         for (let i in all) {
 
@@ -113,7 +141,7 @@ module.exports = {
 
         }
 
-        res.json({ ads })
+        res.json({ ads, total })
 
     },
     getItem: async (req, res) => {
