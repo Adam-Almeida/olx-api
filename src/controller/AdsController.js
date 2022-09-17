@@ -9,7 +9,7 @@ const addImage = async (buffer) => {
     let newName = `${uuidv4()}.jpg`
     let tmpImg = await jimp.read(buffer)
     tmpImg.cover(500, 500).quality(80).write(`./public/media/${newName}`)
-    return newName 
+    return newName
 }
 
 module.exports = {
@@ -18,29 +18,29 @@ module.exports = {
 
         let categories = []
 
-        for(let i in categoryAll) {
+        for (let i in categoryAll) {
             categories.push({
                 ...categoryAll[i]._doc,
                 img: `${process.env.BASE}/assets/images/${categoryAll[i].slug}.png`
             })
         }
 
-        res.json({categories})
+        res.json({ categories })
     },
 
     addAction: async (req, res) => {
-        let { title, price, priceNegotiable, description, category, token} = req.body
-        const user = await User.findOne({token}).exec()
+        let { title, price, priceNegotiable, description, category, token } = req.body
+        const user = await User.findOne({ token }).exec()
 
-        if(!title || !category){
-            res.json({error: "Título e categoria são obrigatórios"})
+        if (!title || !category) {
+            res.json({ error: "Título e categoria são obrigatórios" })
             return
         }
 
-        if(price){
+        if (price) {
             price = price.replace('.', '').replace(',', '.').replace('R$ ', '')
             price = parseFloat(price)
-        }else{
+        } else {
             price = 0
         }
 
@@ -56,18 +56,18 @@ module.exports = {
         newAdd.description = description
         newAdd.views = 0
 
-        if(req.files && req.files.img){
-            if(req.files.img.length == undefined){
-                if(['image/jpeg', 'image/jpg', 'image/png'].includes(req.files.img.mimetype)){
+        if (req.files && req.files.img) {
+            if (req.files.img.length == undefined) {
+                if (['image/jpeg', 'image/jpg', 'image/png'].includes(req.files.img.mimetype)) {
                     let url = await addImage(req.files.img.data)
                     newAdd.images.push({
                         url,
                         default: false
                     })
                 }
-            }else{
-                for(let i = 0; i < req.files.length; i++){
-                    if(['image/jpeg', 'image/jpg', 'image/png'].includes(req.files.img[i].mimetype)){
+            } else {
+                for (let i = 0; i < req.files.length; i++) {
+                    if (['image/jpeg', 'image/jpg', 'image/png'].includes(req.files.img[i].mimetype)) {
                         let url = await addImage(req.files.img[i].data)
                         newAdd.images.push({
                             url,
@@ -78,15 +78,42 @@ module.exports = {
             }
         }
 
-        if(newAdd.images.length > 0){
+        if (newAdd.images.length > 0) {
             newAdd.images[0].default = true
         }
 
         const info = await newAdd.save();
-        res.json({info})
+        res.json({ info })
 
     },
     getList: async (req, res) => {
+        const { sort = 'asc', offset = 0, limit = 8, q, category, state } = req.query
+
+        const all = await Ad.find({ status: true }).exec()
+        let ads = []
+        for (let i in all) {
+
+            let image
+            let defaultImg = all[i].images.find(e => e.default);
+            if (defaultImg) {
+                image = `${process.env.BASE}/media/${defaultImg.url}`
+            } else {
+                image = `${process.env.BASE}/media/default.jpg`
+            }
+
+            ads.push({
+                id: all[i]._id,
+                title: all[i].title,
+                price: all[i].price,
+                priceNegotiable: all[i].priceNegotiable,
+                image,
+                description: all[i].description,
+                views: all[i].views,
+            })
+
+        }
+
+        res.json({ ads })
 
     },
     getItem: async (req, res) => {
