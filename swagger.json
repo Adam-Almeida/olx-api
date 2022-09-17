@@ -1,0 +1,127 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "ApiOlx - Documentation",
+        "description": "Api criada com base no modelo da OLX, apenas para estudo.",
+        "version": "1.0.0",
+        "contact": {
+            "email": "adam.designjuridico@gmail.com"
+        }
+    },
+    "paths": {
+        "/user/signup": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Criação de usuário.",
+                "description": "Rota para efeturar a criação de um novo usuário.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    },
+                                    "state": {
+                                        "type": "string"
+                                    }
+                                },
+                                "example": {
+                                    "name": "Adam Almeida",
+                                    "email": "email@test.com.br",
+                                    "password": "123456789",
+                                    "state": "63226ff0c172a67b53e0d9d7"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "$2b$10$JwN11r8lKCvzH7pegecCEOw9VIh15tnUeY2a/ln1bS1LD7H7D6PeO"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno de processamento"
+                    }
+                }
+            }
+        },
+        "/user/signin": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Login de usuário.",
+                "description": "Rota para efeturar login do usuário.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "example": {
+                                    "email": "email@test.com.br",
+                                    "password": "123456789"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token and Email",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "$2b$10$JwN11r8lKCvzH7pegecCEOw9VIh15tnUeY2a/ln1bS1LD7H7D6PeO"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "email@test.com.br"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno de processamento"
+                    }
+                }
+            }
+        }
+    }
+}
