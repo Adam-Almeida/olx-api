@@ -221,6 +221,60 @@ module.exports = {
     },
 
     editAction: async (req, res) => {
+        let { id } = req.params
+        let { title, price, priceNegotiable, description, status, category, images, token } = req.body
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            res.json({ error: 'Id não identificado' })
+            return
+        }
+
+        const ad = await Ad.findById(id).exec()
+        if(!ad){
+            res.json({ error: 'Anuncio inexistente' })
+            return
+        }
+
+        const user = await User.findOne({token}).exec()
+        if(user._id.toString() !== ad.idUser){
+            res.json({ error: 'O anuncio não pertence ao seu usuário' })
+            return
+        }
+
+        let updates = {}
+
+        if(title){
+            updates.title = title
+        }
+        if (price) {
+            price = price.replace('.', '').replace(',', '.').replace('R$ ', '')
+            price = parseFloat(price)
+            updates.price = price
+        } 
+        if(priceNegotiable){
+            updates.priceNegotiable = priceNegotiable
+        }
+        if(description){
+            updates.description = description
+        }
+        if(status){
+            updates.status = status
+        }
+        if(category){
+            const cat = await Category.findOne({slug: category}).exec()
+            if(!cat) {
+                res.json({ error: 'Categoria inexistente' })
+                return
+            } 
+            updates.category = status._id.toString()
+        }
+
+        if(images){
+            updates.images = images
+        }
+
+        await Ad.findByIdAndUpdate(id, {$set: updates})
+        res.json({error: ''})
 
     },
 
