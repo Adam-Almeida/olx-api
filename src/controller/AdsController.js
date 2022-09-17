@@ -176,15 +176,15 @@ module.exports = {
         const state = await State.findById(ad.state).exec()
 
         let others = []
-        if(other){
+        if (other) {
             const otherData = await Ad.find().exec()
-            for(let i in otherData){
-                if(otherData[i]._id.toString() != ad._id.toString()){
+            for (let i in otherData) {
+                if (otherData[i]._id.toString() != ad._id.toString()) {
 
                     let image = `${process.env.BASE}/media/default.jpg`
 
                     let defaultImg = otherData[i].images.find(e => e.default)
-                    if(defaultImg){
+                    if (defaultImg) {
                         image = `${process.env.BASE}/media/${defaultImg.url}`
                     }
 
@@ -230,51 +230,78 @@ module.exports = {
         }
 
         const ad = await Ad.findById(id).exec()
-        if(!ad){
+        if (!ad) {
             res.json({ error: 'Anuncio inexistente' })
             return
         }
 
-        const user = await User.findOne({token}).exec()
-        if(user._id.toString() !== ad.idUser){
+        const user = await User.findOne({ token }).exec()
+        if (user._id.toString() !== ad.idUser) {
             res.json({ error: 'O anuncio não pertence ao seu usuário' })
             return
         }
 
         let updates = {}
 
-        if(title){
+        if (title) {
             updates.title = title
         }
         if (price) {
             price = price.replace('.', '').replace(',', '.').replace('R$ ', '')
             price = parseFloat(price)
             updates.price = price
-        } 
-        if(priceNegotiable){
+        }
+        if (priceNegotiable) {
             updates.priceNegotiable = priceNegotiable
         }
-        if(description){
+        if (description) {
             updates.description = description
         }
-        if(status){
+        if (status) {
             updates.status = status
         }
-        if(category){
-            const cat = await Category.findOne({slug: category}).exec()
-            if(!cat) {
+        if (category) {
+            const cat = await Category.findOne({ slug: category }).exec()
+            if (!cat) {
                 res.json({ error: 'Categoria inexistente' })
                 return
-            } 
+            }
             updates.category = status._id.toString()
         }
 
-        if(images){
+        if (images) {
             updates.images = images
         }
 
-        await Ad.findByIdAndUpdate(id, {$set: updates})
-        res.json({error: ''})
+        await Ad.findByIdAndUpdate(id, { $set: updates })
+
+        if (req.files && req.files.img) {
+            const adI = await Ad.findById(id)
+
+            if (req.files.img.length == undefined) {
+                if (['image/jpeg', 'image/jpg', 'image/png'].includes(req.files.img.mimetype)) {
+                    let url = await addImage(req.files.img.data)
+                    adI.images.push({
+                        url,
+                        default: false
+                    })
+                }
+            } else {
+                for (let i = 0; i < req.files.length; i++) {
+                    if (['image/jpeg', 'image/jpg', 'image/png'].includes(req.files.img[i].mimetype)) {
+                        let url = await addImage(req.files.img[i].data)
+                        adI.images.push({
+                            url,
+                            default: false
+                        })
+                    }
+                }
+            }
+            adI.images = [...adI.images]
+            await adI.save()
+        }
+
+        res.json({ ok: 'Anuncio atualizado com sucesso.' })
 
     },
 
