@@ -131,24 +131,24 @@
                 "summary": "Listagem de Estados.",
                 "description": "Rota para listar todos os estados cadastrados.",
                 "parameters": [
-					{
-						"in": "query",
-						"name": "user",
-						"description": "Listagem de estados",
-						"schema": {
-							"type": "object",
-							"required": [
-								"token"
-							],
-							"properties": {
-								"token": {
-									"type": "string",
+                    {
+                        "in": "query",
+                        "name": "user",
+                        "description": "Listagem de estados",
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "token"
+                            ],
+                            "properties": {
+                                "token": {
+                                    "type": "string",
                                     "example": "$2b$10$BDXB1I/dg8BWc96WPTlV4.7E3gZ/LBs9OPt0iCQ2aJIadi0lAf4Ae"
-								}
-							}
-						}
-					}
-				],
+                                }
+                            }
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Token",
@@ -160,7 +160,7 @@
                                         "_id": {
                                             "type": "string"
                                         },
-                                        "name":{
+                                        "name": {
                                             "type": "string"
                                         }
                                     },
@@ -176,7 +176,7 @@
                             }
                         }
                     },
-                    "401":{
+                    "401": {
                         "description": "Unauthorized"
                     },
                     "500": {
