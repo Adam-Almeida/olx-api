@@ -9,6 +9,10 @@ const Auth = require('./middlewares/Auth')
 const AuthValidator = require('./validators/AuthValidator')
 const UserValidator = require('./validators/UserValidator')
 
+router.get('/', (req, res) => {
+    res.redirect('/api-docs')
+})
+
 router.get('/ping', (req, res) => {
     res.json({ pong: true })
 })
