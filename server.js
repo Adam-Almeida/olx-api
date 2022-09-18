@@ -10,6 +10,7 @@ const swaggerFile = require('./swagger.json')
 const server = express()
 
 mongoose.connect(process.env.DATABASE, { useNewUrlParser: true });
+
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 server.use(cors())
